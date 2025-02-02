@@ -4,8 +4,8 @@ import argparse
 import yaml
 from fastapi import FastAPI
 from pydantic import BaseModel
-from IrSender.ir_sender import LogLevel
-from IrSender.mitsubishi import Mitsubishi, ClimateMode, FanMode, VanneVerticalMode, VanneHorizontalMode, ISeeMode, AreaMode, PowerfulMode
+from ir_sender.ir_sender import LogLevel
+from ir_sender.mitsubishi import Mitsubishi, ClimateMode, FanMode, VanneVerticalMode, VanneHorizontalMode, ISeeMode, AreaMode, PowerfulMode
 
 app = FastAPI()
 
