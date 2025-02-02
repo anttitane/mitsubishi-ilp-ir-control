@@ -3,8 +3,8 @@ import datetime
 import argparse
 from fastapi import FastAPI
 from pydantic import BaseModel
-from hvac_ircontrol.ir_sender import LogLevel
-from hvac_ircontrol.mitsubishi import Mitsubishi, ClimateMode, FanMode, VanneVerticalMode, VanneHorizontalMode, ISeeMode, AreaMode, PowerfulMode
+from IrSender.ir_sender import LogLevel
+from IrSender.mitsubishi import Mitsubishi, ClimateMode, FanMode, VanneVerticalMode, VanneHorizontalMode, ISeeMode, AreaMode, PowerfulMode
 
 app = FastAPI()
 
