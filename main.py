@@ -16,11 +16,11 @@ with open("config.yaml", 'r') as f:
 # Retrieve GPIO pin number from the configuration
 gpio_pin = config['gpio']['pin']
 
-# Initialize HVAC class with IR sender
-HVAC = Mitsubishi(gpio_pin, LogLevel.ErrorsOnly)  # (GPIO pin number, Log level)
+# Initialize AirPumpController class with IR sender
+AirPumpController = Mitsubishi(gpio_pin, LogLevel.ErrorsOnly)  # (GPIO pin number, Log level)
 
 # Define the request model for the API
-class HVACRequest(BaseModel):
+class AirPumpRequest(BaseModel):
     mode: str
     temperature: int
     fan_speed: str = "auto"
@@ -44,9 +44,9 @@ def get_fan_speed_selection(fan_speed):
     else:
         return FanMode.Auto
 
-# Endpoint to control HVAC
-@app.post("/control_hvac/")
-def control_hvac(request: HVACRequest):
+# Endpoint to control air pump
+@app.post("/control_air_pump/")
+def control_air_pump(request: AirPumpRequest):
     mode = request.mode
     temperature = request.temperature
     fan_speed = request.fan_speed
@@ -56,12 +56,12 @@ def control_hvac(request: HVACRequest):
 
     if temperature == 0:
         print("Powering off...")
-        HVAC.power_off()
+        AirPumpController.power_off()
         return {"status": "Powered off"}
 
     if mode == "cooling" and temperature > 0:
         print("Sending cooling command...")
-        HVAC.send_command(
+        AirPumpController.send_command(
             climate_mode=ClimateMode.Cold,
             temperature=temperature,
             fan_mode=FanSpeedSelection,
@@ -75,7 +75,7 @@ def control_hvac(request: HVACRequest):
 
     if mode == "heating" and temperature > 0:
         print("Sending heating command...")
-        HVAC.send_command(
+        AirPumpController.send_command(
             climate_mode=ClimateMode.Hot,
             temperature=temperature,
             fan_mode=FanSpeedSelection,
