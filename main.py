@@ -1,6 +1,7 @@
 import time
 import datetime
 import argparse
+import yaml
 from fastapi import FastAPI
 from pydantic import BaseModel
 from IrSender.ir_sender import LogLevel
@@ -8,8 +9,15 @@ from IrSender.mitsubishi import Mitsubishi, ClimateMode, FanMode, VanneVerticalM
 
 app = FastAPI()
 
-# Define the HVAC class with IR sender
-HVAC = Mitsubishi(23, LogLevel.ErrorsOnly)  # (GPIO pin number, Log level)
+# Load configuration
+with open("config.yaml", 'r') as f:
+    config = yaml.safe_load(f)
+
+# Retrieve GPIO pin number from the configuration
+gpio_pin = config['gpio']['pin']
+
+# Initialize HVAC class with IR sender
+HVAC = Mitsubishi(gpio_pin, LogLevel.ErrorsOnly)  # (GPIO pin number, Log level)
 
 # Define the request model for the API
 class HVACRequest(BaseModel):
