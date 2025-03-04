@@ -1,10 +1,3 @@
-# HVAC-IR-Control - Python port for RPI3
-# Eric Masse (Ericmas001) - 2017-06-30
-# https://github.com/Ericmas001/HVAC-IR-Control
-
-# From original: https://github.com/bschwind/ir-slinger
-# (c)  Danijel Tudek - Aug 2016 - Python IR transmitter
-
 import ctypes
 import time
 
@@ -239,19 +232,38 @@ class RAW():
     def one(self):
         self.wave_generator.one(self.one_duration)
 
-class IrSender():
-    def __init__(self, gpio_pin, protocol, protocol_config, log_level = LogLevel.Minimal):
-        self.log_level = log_level
+class IrSender:
+    def __init__(self, gpio_pin, protocol, protocol_config, log_level=LogLevel.Minimal):
+        """
+        Initializes the IR sender.
         
+        Parameters:
+            gpio_pin (int): The GPIO pin used for IR transmission.
+            protocol (str): The IR protocol (e.g., "NEC", "RC-5", "RAW").
+            protocol_config (dict): Configuration parameters for the chosen protocol.
+            log_level (LogLevel): The verbosity level for logging.
+        """
+        self.log_level = log_level
         self.__log(LogLevel.Minimal, "Starting IR")
         self.__log(LogLevel.Normal, "Loading libpigpio.so")
-        self.pigpio = ctypes.CDLL('libpigpio.so')
+
+        # Load the pigpio library
+        try:
+            self.pigpio = ctypes.CDLL('/usr/lib/libpigpio.so')
+        except OSError as e:
+            self.__log(LogLevel.ErrorsOnly, f"Failed to load libpigpio.so: {e}")
+            raise RuntimeError("Failed to load libpigpio.so")
+        
         self.__log(LogLevel.Normal, "Initializing pigpio")
-        PI_OUTPUT = 1 # from pigpio.h
         self.pigpio.gpioInitialise()
+
+        # Set up the GPIO pin for output
         self.gpio_pin = gpio_pin
-        self.__log(LogLevel.Normal, "Configuring pin %d as output" % self.gpio_pin)
-        self.pigpio.gpioSetMode(self.gpio_pin, PI_OUTPUT) # pin 17 is used in LIRC by default
+        self.__log(LogLevel.Normal, f"Configuring pin {self.gpio_pin} as output")
+        PI_OUTPUT = 1  # Defined in pigpio.h
+        self.pigpio.gpioSetMode(self.gpio_pin, PI_OUTPUT)
+
+        # Initialize the IR protocol
         self.__log(LogLevel.Normal, "Initializing protocol")
         if protocol == "NEC":
             self.protocol = NEC(self, log_level, **protocol_config)
@@ -261,69 +273,90 @@ class IrSender():
             self.protocol = RAW(self, log_level, **protocol_config)
         else:
             self.__log(LogLevel.ErrorsOnly, "Protocol not specified! Exiting...")
-            return 1
+            raise ValueError("Protocol not specified!")
+        
         self.__log(LogLevel.Minimal, "IR ready")
 
     def __log(self, min_log_level, message):
+        """Logs messages based on the set log level."""
         if min_log_level <= self.log_level:
             print(message)
 
-    # send_code takes care of sending the processed IR code to pigpio.
-    # IR code itself is processed and converted to pigpio structs by protocol's classes.
-    def send_code(self, ircode, nb = 1):
-        self.__log(LogLevel.Normal, "Processing IR code: %s" % ' '.join([ ircode[i:i+8] for i in range(0, len(ircode), 8) ]))
-        for _ in range(0, nb):
+    def send_code(self, ircode, nb=1):
+        """
+        Sends the processed IR code to pigpio.
+        
+        Parameters:
+            ircode (str): The binary IR code to send.
+            nb (int): Number of times to send the code.
+        """
+        self.__log(LogLevel.Normal, f"Processing IR code: {' '.join([ircode[i:i+8] for i in range(0, len(ircode), 8)])}")
+        
+        for _ in range(nb):
             code = self.protocol.process_code(ircode)
             if code != 0:
                 self.__log(LogLevel.ErrorsOnly, "Error in processing IR code!")
                 return 1
-        clear = self.pigpio.gpioWaveClear()
-        if clear != 0:
+
+        # Clear existing waveform
+        if self.pigpio.gpioWaveClear() != 0:
             self.__log(LogLevel.ErrorsOnly, "Error in clearing wave!")
             return 1
+
+        # Add wave to pigpio
         pulses = self.pigpio.gpioWaveAddGeneric(self.protocol.wave_generator.pulse_count, self.protocol.wave_generator.pulses)
         if pulses < 0:
             self.__log(LogLevel.ErrorsOnly, "Error in adding wave!")
             return 1
+
+        # Create and send the wave
         wave_id = self.pigpio.gpioWaveCreate()
-        # Unlike the C implementation, in Python the wave_id seems to always be 0.
         if wave_id >= 0:
             self.__log(LogLevel.Normal, "Sending wave...")
             result = self.pigpio.gpioWaveTxSend(wave_id, 0)
             if result >= 0:
-                self.__log(LogLevel.Normal, "Success! (result: %d)" % result)
+                self.__log(LogLevel.Normal, f"Success! (result: {result})")
             else:
-                self.__log(LogLevel.ErrorsOnly, "Error sending wave! (result: %d)" % result)
+                self.__log(LogLevel.ErrorsOnly, f"Error sending wave! (result: {result})")
                 return 1
         else:
-            self.__log(LogLevel.ErrorsOnly, "Error creating wave: %d" % wave_id)
+            self.__log(LogLevel.ErrorsOnly, f"Error creating wave: {wave_id}")
             return 1
+
+        # Wait for transmission to complete
         while self.pigpio.gpioWaveTxBusy():
             time.sleep(0.1)
+
         self.__log(LogLevel.Normal, "Deleting wave")
         self.pigpio.gpioWaveDelete(wave_id)
+
         self.__log(LogLevel.Minimal, "Terminating pigpio")
         self.pigpio.gpioTerminate()
 
-    def send_data(self, data, maxMask, mustInvert, nb = 1):
-        code = []
-        self.__log(LogLevel.Minimal, "Sending data %s:" % ("inverted " if mustInvert else ""))
+    def send_data(self, data, maxMask, mustInvert, nb=1):
+        """
+        Processes and sends raw data by converting it into an IR code.
+        
+        Parameters:
+            data (list): The raw data to send.
+            maxMask (int): The maximum mask value for bit extraction.
+            mustInvert (bool): Whether to invert the data.
+            nb (int): Number of times to send the data.
+        """
+        self.__log(LogLevel.Minimal, f"Sending {'inverted ' if mustInvert else ''}data:")
         self.__log(LogLevel.Minimal, (' '.join('{:x}'.format(d) for d in data)).upper())
-        # Send all Bits from Byte Data in Reverse Order
-        for i in range(0, len(data)):
+        
+        # Convert raw data to IR code
+        code = []
+        for i in range(len(data)):
             idx = i if mustInvert else (len(data) - i - 1)
             mask = 1
             while mask < maxMask and mask > 0:
                 if mustInvert:
-                    if data[idx] & mask:
-                        code = code + ['1']
-                    else:
-                        code = code + ['0']
+                    code.append('1' if data[idx] & mask else '0')
                 else:
-                    if data[idx] & mask:
-                        code = ['1'] + code
-                    else:
-                        code = ['0'] + code
-                mask = mask << 1
-
+                    code.insert(0, '1' if data[idx] & mask else '0')
+                mask <<= 1
+        
+        # Send the processed IR code
         self.send_code(''.join(code), nb)
