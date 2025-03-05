@@ -38,6 +38,9 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install -y git python3 python3-pip pigpio python3-pigpio
 ```
 
+#### 🔧 Important Note on pigpio Usage
+When using `libpigpio.so` via `ctypes.CDLL('/usr/lib/libpigpio.so')`, ensure that the `pigpiod` service is **not running**, as they cannot be used simultaneously. This prevents conflicts when accessing the GPIO hardware.
+
 ### 4️⃣ Disable Wi-Fi Power Saving (Optional, but Recommended)
 - Create a NetworkManager configuration file:
   ```sh
@@ -88,17 +91,6 @@ To deactivate the virtual environment:
 ```sh
 deactivate
 ```
-
-## 🔧 Important Note on pigpio Usage
-When using `libpigpio.so` via `ctypes.CDLL('/usr/lib/libpigpio.so')`, ensure that the `pigpiod` service is **not running**, as they cannot be used simultaneously. If using the daemon, start it with:
-```sh
-sudo systemctl start pigpiod
-```
-If using the direct library, stop the daemon first:
-```sh
-sudo systemctl stop pigpiod
-```
-This prevents conflicts when accessing the GPIO hardware.
 
 ## 🔧 API Endpoints
 ### **Control Air Pump**
