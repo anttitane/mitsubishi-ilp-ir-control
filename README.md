@@ -11,7 +11,7 @@ A FastAPI-based application for controlling Mitsubishi HVAC systems using IR sig
 ### Project background
 - Code in IrSender folder has been copied (and slightly modified) from [Ericmas001](https://github.com/Ericmas001/HVAC-IR-Control)
 
-## 📜 Requirements
+## 🐜 Requirements
 ### Hardware
 - **Raspberry Pi Zero W** (or other Raspberry Pi models)
 - IR LED connected to GPIO
@@ -89,6 +89,17 @@ To deactivate the virtual environment:
 deactivate
 ```
 
+## 🔧 Important Note on pigpio Usage
+When using `libpigpio.so` via `ctypes.CDLL('/usr/lib/libpigpio.so')`, ensure that the `pigpiod` service is **not running**, as they cannot be used simultaneously. If using the daemon, start it with:
+```sh
+sudo systemctl start pigpiod
+```
+If using the direct library, stop the daemon first:
+```sh
+sudo systemctl stop pigpiod
+```
+This prevents conflicts when accessing the GPIO hardware.
+
 ## 🔧 API Endpoints
 ### **Control Air Pump**
 **POST /control_air_pump/**
@@ -116,3 +127,4 @@ curl -X POST "http://localhost:8000/control_air_pump/" \
 
 ### **Test in Browser (Swagger UI)**
 Go to **http://localhost:8000/docs**
+
