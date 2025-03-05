@@ -82,8 +82,13 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
+### 8️⃣ Configure GPIO Pin
+```sh
+nano config.yaml
+```
+- Modify pin number to match your setup, save and exit (`CTRL + X`, then `Y`, and `Enter`).
 
-### 8️⃣ Run FastAPI App
+### 9️⃣ Run FastAPI App
 ```sh
 sudo uvicorn main:app --host 0.0.0.0 --port 8000
 ```
