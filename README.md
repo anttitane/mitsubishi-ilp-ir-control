@@ -11,7 +11,7 @@ A FastAPI-based application for controlling Mitsubishi HVAC systems using IR sig
 ### Project background
 - Code in IrSender folder has been copied (and slightly modified) from [Ericmas001](https://github.com/Ericmas001/HVAC-IR-Control)
 
-## 📜 Requirements
+## 🐜 Requirements
 ### Hardware
 - **Raspberry Pi Zero W** (or other Raspberry Pi models)
 - IR LED connected to GPIO
@@ -167,3 +167,4 @@ curl -X POST "http://localhost:8000/air_pump/cool/" \
 
 ### **Test in Browser (Swagger UI)**
 Go to **http://localhost:8000/docs**
+
