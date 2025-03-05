@@ -5,7 +5,7 @@ A FastAPI-based application for controlling Mitsubishi HVAC systems using IR sig
 ## 🚀 Features
 - Control Mitsubishi HVAC using **FastAPI**
 - Sends **IR signals** via Raspberry Pi GPIO
-- Supports **cooling, heating, fan speed, and temperature settings**
+- Supports **cooling, heating, fan speed, temperature, vertical mode, and horizontal mode settings**
 - Works with **Raspberry Pi Zero W**
 
 ### Project background
@@ -138,13 +138,17 @@ sudo systemctl restart mitsubishi-ilp.service
 
 ## 🔧 API Endpoints
 ### **Control Air Pump**
-**POST /control_air_pump/**
+**POST /air_pump/cool/** (for cooling)  
+**POST /air_pump/heat/** (for heating)  
+**POST /air_pump/off/** (to turn off)
+
 #### Request Body (JSON):
 ```json
 {
-  "mode": "cooling",
   "temperature": 21,
-  "fan_speed": "high"
+  "fan_speed": "high",
+  "vertical_mode": "auto",
+  "horizontal_mode": "middle"
 }
 ```
 #### Response:
@@ -156,11 +160,10 @@ sudo systemctl restart mitsubishi-ilp.service
 
 ### **Test via cURL**
 ```sh
-curl -X POST "http://localhost:8000/control_air_pump/" \
+curl -X POST "http://localhost:8000/air_pump/cool/" \
      -H "Content-Type: application/json" \
-     -d '{"mode":"cooling", "temperature":21, "fan_speed":"high"}'
+     -d '{"temperature":21, "fan_speed":"high", "vertical_mode":"auto", "horizontal_mode":"middle"}'
 ```
 
 ### **Test in Browser (Swagger UI)**
 Go to **http://localhost:8000/docs**
-
