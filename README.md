@@ -23,6 +23,13 @@ A FastAPI-based application for controlling Mitsubishi HVAC systems using IR sig
 - **Python 3.9+**
 - **FastAPI, Uvicorn, and dependencies**
 
+## ⚠️ Important Note About `pigpio`
+When using `self.pigpio = ctypes.CDLL('/usr/lib/libpigpio.so')`, ensure that the `pigpiod` service is **not** running. You must **stop and disable** the service before running the app:
+```sh
+sudo systemctl stop pigpiod
+sudo systemctl disable pigpiod
+```
+
 ## 🛠️ Installation
 ### 1️⃣ Install Raspberry Pi OS
 Download and install **Raspberry Pi OS Bookworm** from the official site:
@@ -82,11 +89,55 @@ pip install -r requirements.txt
 
 ### 8️⃣ Run FastAPI App
 ```sh
-uvicorn main:app --host 0.0.0.0 --port 8000
+sudo uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 To deactivate the virtual environment:
 ```sh
 deactivate
+```
+
+## 🔄 Run App on Boot (Systemd Service)
+To automatically start the application on boot, create a **systemd service**:
+
+1️⃣ Create a new systemd service file:
+```sh
+sudo nano /etc/systemd/system/mitsubishi-ilp.service
+```
+
+2️⃣ Add the following content:
+```ini
+[Unit]
+Description=Mitsubishi ILP IR Control API
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/sudo /home/pi/mitsubishi-ilp-ir-control/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+WorkingDirectory=/home/pi/mitsubishi-ilp-ir-control
+Environment="PATH=/home/pi/mitsubishi-ilp-ir-control/venv/bin"
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+```
+
+3️⃣ Reload systemd and enable the service:
+```sh
+sudo systemctl daemon-reload
+sudo systemctl enable mitsubishi-ilp.service
+sudo systemctl start mitsubishi-ilp.service
+```
+
+4️⃣ Check the service status:
+```sh
+sudo systemctl status mitsubishi-ilp.service
+```
+
+If you need to stop or restart the service:
+```sh
+sudo systemctl stop mitsubishi-ilp.service
+sudo systemctl restart mitsubishi-ilp.service
 ```
 
 ## 🔧 API Endpoints
@@ -116,3 +167,4 @@ curl -X POST "http://localhost:8000/control_air_pump/" \
 
 ### **Test in Browser (Swagger UI)**
 Go to **http://localhost:8000/docs**
+
