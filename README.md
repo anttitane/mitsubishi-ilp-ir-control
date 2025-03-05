@@ -23,13 +23,6 @@ A FastAPI-based application for controlling Mitsubishi HVAC systems using IR sig
 - **Python 3.9+**
 - **FastAPI, Uvicorn, and dependencies**
 
-## ⚠️ Important Note About `pigpio`
-When using `self.pigpio = ctypes.CDLL('/usr/lib/libpigpio.so')`, ensure that the `pigpiod` service is **not** running. You must **stop and disable** the service before running the app:
-```sh
-sudo systemctl stop pigpiod
-sudo systemctl disable pigpiod
-```
-
 ## 🛠️ Installation
 ### 1️⃣ Install Raspberry Pi OS
 Download and install **Raspberry Pi OS Bookworm** from the official site:
@@ -44,6 +37,9 @@ sudo apt update && sudo apt upgrade -y
 ```sh
 sudo apt install -y git python3 python3-pip pigpio python3-pigpio
 ```
+
+#### 🔧 Important Note on pigpio Usage
+When using `libpigpio.so` via `ctypes.CDLL('/usr/lib/libpigpio.so')`, ensure that the `pigpiod` service is **not running**, as they cannot be used simultaneously. This prevents conflicts when accessing the GPIO hardware.
 
 ### 4️⃣ Disable Wi-Fi Power Saving (Optional, but Recommended)
 - Create a NetworkManager configuration file:
