@@ -1,10 +1,14 @@
 import time
 import datetime
+import argparse
 import yaml
 from fastapi import FastAPI
 from pydantic import BaseModel
 from ir_sender.ir_sender import LogLevel
-from ir_sender.mitsubishi import Mitsubishi, ClimateMode, FanMode, VanneVerticalMode, VanneHorizontalMode, ISeeMode, AreaMode, PowerfulMode
+from ir_sender.mitsubishi import (
+    Mitsubishi, ClimateMode, FanMode, VanneVerticalMode, VanneHorizontalMode, 
+    ISeeMode, AreaMode, PowerfulMode
+)
 
 app = FastAPI()
 
@@ -18,71 +22,89 @@ gpio_pin = config['gpio']['pin']
 # Initialize AirPumpController class with IR sender
 AirPumpController = Mitsubishi(gpio_pin, LogLevel.ErrorsOnly)
 
-# Define the request model for the API
-class AirPumpSettings(BaseModel):
+# Define the request model for controlling the air pump
+class AirPumpRequest(BaseModel):
     temperature: int
     fan_speed: str = "auto"
+    vertical_mode: str = "middle"
+    horizontal_mode: str = "middle"
 
-# Print user inputs (for debugging)
-def print_user_inputs(mode, temperature, fan_speed):
-    print("---------------------------------------------")
-    print("Operation mode is {}".format(mode))
-    print("Temperature is {}".format(temperature))
-    print("Fan speed is {}".format(fan_speed))
-    print("---------------------------------------------")
-
-# Set fan speed mode based on input
+# Helper function to map fan speed
 def get_fan_speed_selection(fan_speed):
-    if fan_speed == "low":
-        return FanMode.Speed1
-    elif fan_speed == "med":
-        return FanMode.Speed2
-    elif fan_speed == "high":
-        return FanMode.Speed3
-    else:
-        return FanMode.Auto
+    fan_speed_map = {
+        "low": FanMode.Speed1,
+        "med": FanMode.Speed2,
+        "high": FanMode.Speed3,
+        "auto": FanMode.Auto
+    }
+    return fan_speed_map.get(fan_speed.lower(), FanMode.Auto)
+
+# Helper function to map vertical mode
+def get_vertical_mode(mode):
+    vertical_map = {
+        "auto": VanneVerticalMode.Auto,
+        "top": VanneVerticalMode.Top,
+        "middle_top": VanneVerticalMode.MiddleTop,
+        "middle": VanneVerticalMode.Middle,
+        "middle_bottom": VanneVerticalMode.MiddleBottom,
+        "bottom": VanneVerticalMode.Bottom,
+        "swing": VanneVerticalMode.Swing
+    }
+    return vertical_map.get(mode.lower(), VanneVerticalMode.Middle)
+
+# Helper function to map horizontal mode
+def get_horizontal_mode(mode):
+    horizontal_map = {
+        "not_set": VanneHorizontalMode.NotSet,
+        "left": VanneHorizontalMode.Left,
+        "middle_left": VanneHorizontalMode.MiddleLeft,
+        "middle": VanneHorizontalMode.Middle,
+        "middle_right": VanneHorizontalMode.MiddleRight,
+        "right": VanneHorizontalMode.Right,
+        "swing": VanneHorizontalMode.Swing
+    }
+    return horizontal_map.get(mode.lower(), VanneHorizontalMode.Middle)
 
 # Endpoint to turn off the air pump
 @app.post("/air_pump/off/")
 def turn_off_air_pump():
-    print("Powering off...")
     AirPumpController.power_off()
     return {"status": "Powered off"}
 
-# Endpoint to activate cooling mode
+# Endpoint for cooling
 @app.post("/air_pump/cool/")
-def cool_air_pump(settings: AirPumpSettings):
-    print_user_inputs("cooling", settings.temperature, settings.fan_speed)
-    fan_speed = get_fan_speed_selection(settings.fan_speed)
+def cool_air_pump(request: AirPumpRequest):
+    FanSpeedSelection = get_fan_speed_selection(request.fan_speed)
+    VerticalSelection = get_vertical_mode(request.vertical_mode)
+    HorizontalSelection = get_horizontal_mode(request.horizontal_mode)
+
     AirPumpController.send_command(
         climate_mode=ClimateMode.Cold,
-        temperature=settings.temperature,
-        fan_mode=fan_speed,
-        vanne_vertical_mode=VanneVerticalMode.Top,
-        vanne_horizontal_mode=VanneHorizontalMode.MiddleRight,
+        temperature=request.temperature,
+        fan_mode=FanSpeedSelection,
+        vanne_vertical_mode=VerticalSelection,
+        vanne_horizontal_mode=HorizontalSelection,
         isee_mode=ISeeMode.ISeeOff,
         area_mode=AreaMode.Full,
         powerful=PowerfulMode.PowerfulOff
     )
     return {"status": "Cooling command sent"}
 
-# Endpoint to activate heating mode
+# Endpoint for heating
 @app.post("/air_pump/heat/")
-def heat_air_pump(settings: AirPumpSettings):
-    print_user_inputs("heating", settings.temperature, settings.fan_speed)
-    fan_speed = get_fan_speed_selection(settings.fan_speed)
+def heat_air_pump(request: AirPumpRequest):
+    FanSpeedSelection = get_fan_speed_selection(request.fan_speed)
+    VerticalSelection = get_vertical_mode(request.vertical_mode)
+    HorizontalSelection = get_horizontal_mode(request.horizontal_mode)
+
     AirPumpController.send_command(
         climate_mode=ClimateMode.Hot,
-        temperature=settings.temperature,
-        fan_mode=fan_speed,
-        vanne_vertical_mode=VanneVerticalMode.MiddleTop,
-        vanne_horizontal_mode=VanneHorizontalMode.MiddleRight,
+        temperature=request.temperature,
+        fan_mode=FanSpeedSelection,
+        vanne_vertical_mode=VerticalSelection,
+        vanne_horizontal_mode=HorizontalSelection,
         isee_mode=ISeeMode.ISeeOff,
         area_mode=AreaMode.Full,
         powerful=PowerfulMode.PowerfulOff
     )
     return {"status": "Heating command sent"}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
