@@ -5,13 +5,13 @@ A FastAPI-based application for controlling Mitsubishi HVAC systems using IR sig
 ## 🚀 Features
 - Control Mitsubishi HVAC using **FastAPI**
 - Sends **IR signals** via Raspberry Pi GPIO
-- Supports **cooling, heating, fan speed, temperature, vertical mode, and horizontal mode settings**
+- Supports **cooling, heating, fan speed, temperature, and vane position settings**
 - Works with **Raspberry Pi Zero W**
 
 ### Project background
 - Code in IrSender folder has been copied (and slightly modified) from [Ericmas001](https://github.com/Ericmas001/HVAC-IR-Control)
 
-## 🐜 Requirements
+## 📜 Requirements
 ### Hardware
 - **Raspberry Pi Zero W** (or other Raspberry Pi models)
 - IR LED connected to GPIO
@@ -137,18 +137,33 @@ sudo systemctl restart mitsubishi-ilp.service
 ```
 
 ## 🔧 API Endpoints
-### **Control Air Pump**
-**POST /air_pump/cool/** (for cooling)  
-**POST /air_pump/heat/** (for heating)  
-**POST /air_pump/off/** (to turn off)
-
+### **Heating**
+**POST /heating/**
 #### Request Body (JSON):
 ```json
 {
-  "temperature": 21,
+  "temperature": 22,
   "fan_speed": "high",
-  "vertical_mode": "auto",
-  "horizontal_mode": "middle"
+  "vertical_mode": "MiddleTop",
+  "horizontal_mode": "MiddleRight"
+}
+```
+#### Response:
+```json
+{
+  "status": "Heating command sent"
+}
+```
+
+### **Cooling**
+**POST /cooling/**
+#### Request Body (JSON):
+```json
+{
+  "temperature": 20,
+  "fan_speed": "auto",
+  "vertical_mode": "Top",
+  "horizontal_mode": "Left"
 }
 ```
 #### Response:
@@ -158,13 +173,43 @@ sudo systemctl restart mitsubishi-ilp.service
 }
 ```
 
-### **Test via cURL**
-```sh
-curl -X POST "http://localhost:8000/air_pump/cool/" \
-     -H "Content-Type: application/json" \
-     -d '{"temperature":21, "fan_speed":"high", "vertical_mode":"auto", "horizontal_mode":"middle"}'
+### **Turn Off Air Pump**
+**POST /turn_off/**
+#### Request Body (JSON):
+```json
+{}
 ```
+#### Response:
+```json
+{
+  "status": "Powered off"
+}
+```
+
+### **Available Options**
+#### Fan Speed Options:
+- `auto`
+- `low`
+- `med`
+- `high`
+
+#### Vertical Mode Options:
+- `Auto`
+- `Top`
+- `MiddleTop`
+- `Middle`
+- `MiddleBottom`
+- `Bottom`
+- `Swing`
+
+#### Horizontal Mode Options:
+- `NotSet`
+- `Left`
+- `MiddleLeft`
+- `Middle`
+- `MiddleRight`
+- `Right`
+- `Swing`
 
 ### **Test in Browser (Swagger UI)**
 Go to **http://localhost:8000/docs**
-
