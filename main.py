@@ -1,6 +1,5 @@
 import time
 import datetime
-import argparse
 import yaml
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -17,11 +16,10 @@ with open("config.yaml", 'r') as f:
 gpio_pin = config['gpio']['pin']
 
 # Initialize AirPumpController class with IR sender
-AirPumpController = Mitsubishi(gpio_pin, LogLevel.ErrorsOnly)  # (GPIO pin number, Log level)
+AirPumpController = Mitsubishi(gpio_pin, LogLevel.ErrorsOnly)
 
 # Define the request model for the API
-class AirPumpRequest(BaseModel):
-    mode: str
+class AirPumpSettings(BaseModel):
     temperature: int
     fan_speed: str = "auto"
 
@@ -44,50 +42,46 @@ def get_fan_speed_selection(fan_speed):
     else:
         return FanMode.Auto
 
-# Endpoint to control air pump
-@app.post("/control_air_pump/")
-def control_air_pump(request: AirPumpRequest):
-    mode = request.mode
-    temperature = request.temperature
-    fan_speed = request.fan_speed
+# Endpoint to turn off the air pump
+@app.post("/air_pump/off/")
+def turn_off_air_pump():
+    print("Powering off...")
+    AirPumpController.power_off()
+    return {"status": "Powered off"}
 
-    print_user_inputs(mode, temperature, fan_speed)
-    FanSpeedSelection = get_fan_speed_selection(fan_speed)
+# Endpoint to activate cooling mode
+@app.post("/air_pump/cool/")
+def cool_air_pump(settings: AirPumpSettings):
+    print_user_inputs("cooling", settings.temperature, settings.fan_speed)
+    fan_speed = get_fan_speed_selection(settings.fan_speed)
+    AirPumpController.send_command(
+        climate_mode=ClimateMode.Cold,
+        temperature=settings.temperature,
+        fan_mode=fan_speed,
+        vanne_vertical_mode=VanneVerticalMode.Top,
+        vanne_horizontal_mode=VanneHorizontalMode.MiddleRight,
+        isee_mode=ISeeMode.ISeeOff,
+        area_mode=AreaMode.Full,
+        powerful=PowerfulMode.PowerfulOff
+    )
+    return {"status": "Cooling command sent"}
 
-    if temperature == 0:
-        print("Powering off...")
-        AirPumpController.power_off()
-        return {"status": "Powered off"}
-
-    if mode == "cooling" and temperature > 0:
-        print("Sending cooling command...")
-        AirPumpController.send_command(
-            climate_mode=ClimateMode.Cold,
-            temperature=temperature,
-            fan_mode=FanSpeedSelection,
-            vanne_vertical_mode=VanneVerticalMode.Top,
-            vanne_horizontal_mode=VanneHorizontalMode.MiddleRight,
-            isee_mode=ISeeMode.ISeeOff,
-            area_mode=AreaMode.Full,
-            powerful=PowerfulMode.PowerfulOff
-        )
-        return {"status": "Cooling command sent"}
-
-    if mode == "heating" and temperature > 0:
-        print("Sending heating command...")
-        AirPumpController.send_command(
-            climate_mode=ClimateMode.Hot,
-            temperature=temperature,
-            fan_mode=FanSpeedSelection,
-            vanne_vertical_mode=VanneVerticalMode.MiddleTop,
-            vanne_horizontal_mode=VanneHorizontalMode.MiddleRight,
-            isee_mode=ISeeMode.ISeeOff,
-            area_mode=AreaMode.Full,
-            powerful=PowerfulMode.PowerfulOff
-        )
-        return {"status": "Heating command sent"}
-
-    return {"status": "Invalid command"}
+# Endpoint to activate heating mode
+@app.post("/air_pump/heat/")
+def heat_air_pump(settings: AirPumpSettings):
+    print_user_inputs("heating", settings.temperature, settings.fan_speed)
+    fan_speed = get_fan_speed_selection(settings.fan_speed)
+    AirPumpController.send_command(
+        climate_mode=ClimateMode.Hot,
+        temperature=settings.temperature,
+        fan_mode=fan_speed,
+        vanne_vertical_mode=VanneVerticalMode.MiddleTop,
+        vanne_horizontal_mode=VanneHorizontalMode.MiddleRight,
+        isee_mode=ISeeMode.ISeeOff,
+        area_mode=AreaMode.Full,
+        powerful=PowerfulMode.PowerfulOff
+    )
+    return {"status": "Heating command sent"}
 
 if __name__ == "__main__":
     import uvicorn
