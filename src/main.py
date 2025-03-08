@@ -1,12 +1,12 @@
-import time
-import datetime
-import argparse
+import os
 import yaml
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from ir_sender.ir_sender import LogLevel
 from ir_sender.mitsubishi import (
-    Mitsubishi, ClimateMode, FanMode, VanneVerticalMode, VanneHorizontalMode, 
+    Mitsubishi, ClimateMode, FanMode, VanneVerticalMode, VanneHorizontalMode,
     ISeeMode, AreaMode, PowerfulMode
 )
 
@@ -15,6 +15,13 @@ app = FastAPI()
 # Load configuration
 with open("config.yaml", 'r') as f:
     config = yaml.safe_load(f)
+
+# Get path to the React build folder
+CURRENT_DIR = os.path.dirname(__file__)
+UI_BUILD_DIR = os.path.join(CURRENT_DIR, "react_ui", "build")
+
+# Mount the 'build' folder at the root path
+app.mount("/", StaticFiles(directory=UI_BUILD_DIR, html=True), name="static")
 
 # Retrieve GPIO pin number from the configuration
 gpio_pin = config['gpio']['pin']
