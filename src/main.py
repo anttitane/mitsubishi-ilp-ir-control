@@ -39,7 +39,7 @@ app.add_middleware(
 )
 
 # Mount the 'build' folder at the root path
-app.mount("/", StaticFiles(directory=UI_BUILD_DIR, html=True), name="static")
+app.mount("/ui", StaticFiles(directory=UI_BUILD_DIR, html=True), name="static")
 
 # Retrieve GPIO pin number from the configuration
 gpio_pin = config['gpio']['pin']
