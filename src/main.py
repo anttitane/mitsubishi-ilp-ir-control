@@ -21,6 +21,23 @@ CONFIG_PATH = os.path.join(CURRENT_DIR, "..", "config.yaml")
 with open(CONFIG_PATH, 'r') as f:
     config = yaml.safe_load(f)
 
+# CORS settings
+cors_config = config.get("cors", {})
+allow_origins = cors_config.get("allow_origins", [])
+allow_origin_regex = cors_config.get("allow_origin_regex", None)
+allow_methods = cors_config.get("allow_methods", ["*"])
+allow_headers = cors_config.get("allow_headers", ["*"])
+
+# 3. Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allow_origins,          # exact matches
+    allow_origin_regex=allow_origin_regex, # regex match for local network
+    allow_methods=allow_methods,
+    allow_headers=allow_headers,
+    allow_credentials=True,
+)
+
 # Mount the 'build' folder at the root path
 app.mount("/", StaticFiles(directory=UI_BUILD_DIR, html=True), name="static")
 

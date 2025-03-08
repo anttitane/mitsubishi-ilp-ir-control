@@ -83,6 +83,7 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
+
 ### 8️⃣ Configure GPIO Pin
 ```sh
 nano ../config.yaml
@@ -219,3 +220,37 @@ sudo systemctl restart mitsubishi-ilp.service
 
 ### **Test in Browser (Swagger UI)**
 Go to **http://localhost:8000/docs**
+
+## 🌐 CORS Configuration for Local/LAN Access
+If you want to access these endpoints from different origins (e.g., React on `localhost:3000` or a LAN IP like `192.168.1.*`), you must configure CORS in **`config.yaml`** or **`main.py`**. For example:
+
+```yaml
+cors:
+  allow_origins:
+    - "http://127.0.0.1"
+    - "http://localhost:3000"
+  allow_origin_regex: "^http://192\\.168\\.1\\.[0-9]+(:[0-9]+)?$"
+  allow_methods:
+    - "*"
+  allow_headers:
+    - "*"
+```
+
+Adjust the IP range to match your local network. Then, in **`main.py`**:
+```python
+from fastapi.middleware.cors import CORSMiddleware
+
+# Load CORS config from YAML
+cors_config = config.get("cors", {})
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_config.get("allow_origins", []),
+    allow_origin_regex=cors_config.get("allow_origin_regex"),
+    allow_methods=cors_config.get("allow_methods", ["*"]),
+    allow_headers=cors_config.get("allow_headers", ["*"]),
+    allow_credentials=True,
+)
+```
+
+This way, you can **edit your own local network IP ranges** in `config.yaml` without changing the code.
