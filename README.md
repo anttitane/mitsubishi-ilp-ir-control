@@ -69,6 +69,7 @@ When using `libpigpio.so` via `ctypes.CDLL('/usr/lib/libpigpio.so')`, ensure tha
 ```sh
 git clone https://github.com/anttitane/mitsubishi-ilp-ir-control.git
 cd mitsubishi-ilp-ir-control
+cd src
 ```
 
 ### 6️⃣ Create & Activate Virtual Environment
@@ -112,9 +113,9 @@ Description=Mitsubishi ILP IR Control API
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/sudo /home/pi/mitsubishi-ilp-ir-control/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
-WorkingDirectory=/home/pi/mitsubishi-ilp-ir-control
-Environment="PATH=/home/pi/mitsubishi-ilp-ir-control/venv/bin"
+ExecStart=/usr/bin/sudo /home/pi/mitsubishi-ilp-ir-control/src/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+WorkingDirectory=/home/pi/mitsubishi-ilp-ir-control/src
+Environment="PATH=/home/pi/mitsubishi-ilp-ir-control/src/venv/bin"
 Restart=always
 User=root
 Group=root
