@@ -85,7 +85,7 @@ pip install -r requirements.txt
 ```
 ### 8️⃣ Configure GPIO Pin
 ```sh
-nano config.yaml
+nano ../config.yaml
 ```
 - Modify pin number to match your setup, save and exit (`CTRL + X`, then `Y`, and `Enter`).
 

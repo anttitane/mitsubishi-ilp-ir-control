@@ -12,13 +12,14 @@ from ir_sender.mitsubishi import (
 
 app = FastAPI()
 
-# Load configuration
-with open("config.yaml", 'r') as f:
-    config = yaml.safe_load(f)
-
 # Get path to the React build folder
 CURRENT_DIR = os.path.dirname(__file__)
 UI_BUILD_DIR = os.path.join(CURRENT_DIR, "react_ui", "build")
+
+# Go up one level from /src to find config.yaml
+CONFIG_PATH = os.path.join(CURRENT_DIR, "..", "config.yaml")
+with open(CONFIG_PATH, 'r') as f:
+    config = yaml.safe_load(f)
 
 # Mount the 'build' folder at the root path
 app.mount("/", StaticFiles(directory=UI_BUILD_DIR, html=True), name="static")
