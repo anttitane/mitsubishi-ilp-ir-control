@@ -7,6 +7,7 @@ A FastAPI-based application for controlling Mitsubishi HVAC systems using IR sig
 - Sends **IR signals** via Raspberry Pi GPIO
 - Supports **cooling, heating, fan speed, temperature, and vane position settings**
 - Works with **Raspberry Pi Zero W**
+- **Optional web UI** for controlling the endpoints from a modern browser
 
 ### Project background
 - Code in IrSender folder has been copied (and slightly modified) from [Ericmas001](https://github.com/Ericmas001/HVAC-IR-Control)
@@ -69,6 +70,7 @@ When using `libpigpio.so` via `ctypes.CDLL('/usr/lib/libpigpio.so')`, ensure tha
 ```sh
 git clone https://github.com/anttitane/mitsubishi-ilp-ir-control.git
 cd mitsubishi-ilp-ir-control
+cd src
 ```
 
 ### 6️⃣ Create & Activate Virtual Environment
@@ -82,9 +84,10 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
+
 ### 8️⃣ Configure GPIO Pin
 ```sh
-nano config.yaml
+nano ../config.yaml
 ```
 - Modify pin number to match your setup, save and exit (`CTRL + X`, then `Y`, and `Enter`).
 
@@ -112,9 +115,9 @@ Description=Mitsubishi ILP IR Control API
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/sudo /home/pi/mitsubishi-ilp-ir-control/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
-WorkingDirectory=/home/pi/mitsubishi-ilp-ir-control
-Environment="PATH=/home/pi/mitsubishi-ilp-ir-control/venv/bin"
+ExecStart=/usr/bin/sudo /home/pi/mitsubishi-ilp-ir-control/src/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+WorkingDirectory=/home/pi/mitsubishi-ilp-ir-control/src
+Environment="PATH=/home/pi/mitsubishi-ilp-ir-control/src/venv/bin"
 Restart=always
 User=root
 Group=root
@@ -218,3 +221,27 @@ sudo systemctl restart mitsubishi-ilp.service
 
 ### **Test in Browser (Swagger UI)**
 Go to **http://localhost:8000/docs**
+
+## 🌐 Web UI
+This project includes an optional **React**-based web interface for convenient control of the endpoints. 
+
+To use it: **Open** `http://<raspberry-pi-ip>:8000/ui` in your browser.
+
+
+
+## 🌐 CORS Configuration for Local/LAN Access
+If you want to access these endpoints from different origins (e.g., React on `localhost:3000` or a LAN IP like `192.168.1.*`), you must configure CORS in **`config.yaml`**. For example:
+
+```yaml
+cors:
+  allow_origins:
+    - "http://127.0.0.1"
+    - "http://localhost:3000"
+  allow_origin_regex: "^http://192\\.168\\.1\\.[0-9]+(:[0-9]+)?$"
+  allow_methods:
+    - "*"
+  allow_headers:
+    - "*"
+```
+
+Localhost and 192.168.1.x is allowed by default. Adjust the IP range to match your local network.
