@@ -7,6 +7,7 @@ A FastAPI-based application for controlling Mitsubishi HVAC systems using IR sig
 - Sends **IR signals** via Raspberry Pi GPIO
 - Supports **cooling, heating, fan speed, temperature, and vane position settings**
 - Works with **Raspberry Pi Zero W**
+- **Optional web UI** for controlling the endpoints from a modern browser
 
 ### Project background
 - Code in IrSender folder has been copied (and slightly modified) from [Ericmas001](https://github.com/Ericmas001/HVAC-IR-Control)
@@ -221,8 +222,15 @@ sudo systemctl restart mitsubishi-ilp.service
 ### **Test in Browser (Swagger UI)**
 Go to **http://localhost:8000/docs**
 
+## 🌐 Web UI
+This project includes an optional **React**-based web interface for convenient control of the endpoints. 
+
+To use it: **Open** `http://<raspberry-pi-ip>:8000/ui` in your browser.
+
+
+
 ## 🌐 CORS Configuration for Local/LAN Access
-If you want to access these endpoints from different origins (e.g., React on `localhost:3000` or a LAN IP like `192.168.1.*`), you must configure CORS in **`config.yaml`** or **`main.py`**. For example:
+If you want to access these endpoints from different origins (e.g., React on `localhost:3000` or a LAN IP like `192.168.1.*`), you must configure CORS in **`config.yaml`**. For example:
 
 ```yaml
 cors:
@@ -236,21 +244,4 @@ cors:
     - "*"
 ```
 
-Adjust the IP range to match your local network. Then, in **`main.py`**:
-```python
-from fastapi.middleware.cors import CORSMiddleware
-
-# Load CORS config from YAML
-cors_config = config.get("cors", {})
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=cors_config.get("allow_origins", []),
-    allow_origin_regex=cors_config.get("allow_origin_regex"),
-    allow_methods=cors_config.get("allow_methods", ["*"]),
-    allow_headers=cors_config.get("allow_headers", ["*"]),
-    allow_credentials=True,
-)
-```
-
-This way, you can **edit your own local network IP ranges** in `config.yaml` without changing the code.
+Localhost and 192.168.1.x is allowed by default. Adjust the IP range to match your local network.
