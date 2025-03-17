@@ -222,13 +222,6 @@ sudo systemctl restart mitsubishi-ilp.service
 ### **Test in Browser (Swagger UI)**
 Go to **http://localhost:8000/docs**
 
-## 🌐 Web UI
-This project includes an optional **React**-based web interface for convenient control of the endpoints. 
-
-To use it: **Open** `http://<raspberry-pi-ip>:8000/ui` in your browser.
-
-
-
 ## 🌐 CORS Configuration for Local/LAN Access
 If you want to access these endpoints from different origins (e.g., React on `localhost:3000` or a LAN IP like `192.168.1.*`), you must configure CORS in **`config.yaml`**. For example:
 
@@ -245,3 +238,12 @@ cors:
 ```
 
 Localhost and 192.168.1.x is allowed by default. Adjust the IP range to match your local network.
+
+## 🌐 Web UI
+This project includes an optional **React**-based web interface for convenient control of the endpoints. 
+
+To use it: **Open** `http://<raspberry-pi-ip>:8000/ui` in your browser.
+
+## 🏠 Home Assistant Integration
+Custom Home Assistant integration is available for easy integration to Home Assistant:
+**https://github.com/anttitane/mitsubishi-ilp-ir-control-ha-integration**
