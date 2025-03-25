@@ -1,38 +1,102 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.control-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 20px;
+  font-family: Arial, sans-serif;
+  margin-top: 50px;
+}
+
+.temperature-control {
+  position: relative;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.circle {
+  width: 200px;
+  height: 100px;
+  border: none;
+  border-top: 10px solid orange;
+  border-radius: 100px 100px 0 0;
+  position: relative;
+}
+
+.temperature {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.temperature-indicator {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border: 2px solid orange;
+  border-radius: 50%;
+  top: -10px;
+  left: calc(50% - 10px);
+  transform-origin: 50% calc(100% + 50px);
+  pointer-events: none;
+}
+
+.temperature-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.temperature-buttons button {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.mode-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.mode-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.mode-buttons .active {
+  background-color: orange;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.dropdowns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.dropdown-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dropdowns select {
+  width: 200px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
