@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import "./App.css";
 
-const API_BASE_URL = "http://localhost:8000"; // Add base URL for the backend
-
 export default function AirPumpControl() {
   const [mode, setMode] = useState("heat");
   const [temperature, setTemperature] = useState(23);
@@ -13,7 +11,7 @@ export default function AirPumpControl() {
   const sendCommand = async () => {
     if (mode === "off") {
       try {
-        const response = await fetch(`${API_BASE_URL}/air_pump/off/`, {
+        const response = await fetch(`/air_pump/off/`, {
           method: "POST",
         });
         const data = await response.json();
@@ -33,7 +31,7 @@ export default function AirPumpControl() {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
