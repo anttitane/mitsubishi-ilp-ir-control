@@ -1,82 +1,123 @@
-.control-panel {
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 20px;
-  font-family: Arial, sans-serif;
-  margin-top: 50px;
+  height: 100vh;
+}
+
+.control-panel {
+  position: relative;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 60px 20px 20px;
+  width: 300px;
+  text-align: center;
+}
+
+.brand-name.top-left {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #000;
 }
 
 .temperature-control {
+  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
 }
 
 .temperature {
-  font-size: 24px;
+  font-size: 2rem;
   font-weight: bold;
+  margin-bottom: 10px;
 }
 
 .temperature-buttons {
   display: flex;
   gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 .temperature-buttons button {
-  width: 40px;
-  height: 40px;
-  font-size: 18px;
-  font-weight: bold;
+  background: #007bff;
+  color: #fff;
   border: none;
-  border-radius: 50%;
-  background-color: #f0f0f0;
+  border-radius: 5px;
+  padding: 10px 15px;
   cursor: pointer;
+  transition: background 0.3s;
+}
+
+.temperature-buttons button:hover {
+  background: #0056b3;
 }
 
 .mode-buttons {
   display: flex;
+  justify-content: center;
   gap: 10px;
+  margin-bottom: 20px;
 }
 
 .mode-buttons button {
-  padding: 10px 20px;
+  background: #e0e0e0;
   border: none;
   border-radius: 5px;
-  background-color: #f0f0f0;
+  padding: 10px 15px;
   cursor: pointer;
+  transition: background 0.3s;
 }
 
-.mode-buttons .active {
-  background-color: orange;
-  color: white;
+.mode-buttons button.active {
+  background: #007bff;
+  color: #fff;
+}
+
+.mode-buttons button:hover {
+  background: #add8e6;
 }
 
 .dropdowns {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: flex-start;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.dropdowns label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
 }
 
 .dropdowns select {
-  width: 200px;
-  padding: 5px;
+  width: 100%;
+  padding: 8px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
 }
 
 .send-command-button {
-  padding: 10px 20px;
+  background: #28a745;
+  color: #fff;
   border: none;
   border-radius: 5px;
-  background-color: #f0f0f0;
+  padding: 10px 15px;
   cursor: pointer;
-  margin-top: 20px;
+  font-size: 1rem;
+  transition: background 0.3s;
 }
 
 .send-command-button:hover {
-  background-color: orange;
-  color: white;
+  background: #218838;
 }
