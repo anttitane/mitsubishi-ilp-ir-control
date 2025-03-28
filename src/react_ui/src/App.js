@@ -58,13 +58,14 @@ export default function AirPumpControl() {
         <button className={mode === "off" ? "active" : ""} onClick={() => setMode("off")}>Off</button>
       </div>
 
-      <div className="dropdowns">
+      <div className={`dropdowns ${mode === "off" ? "disabled" : ""}`}>
         <div className="dropdown-item">
           <label htmlFor="fan-speed">Fan Speed:</label>
           <select 
             id="fan-speed"
             value={fanSpeed} 
             onChange={(e) => setFanSpeed(e.target.value)}
+            disabled={mode === "off"}
           >
             <option value="auto">Auto</option>
             <option value="low">Low</option>
@@ -79,6 +80,7 @@ export default function AirPumpControl() {
             id="vertical-mode"
             value={verticalMode} 
             onChange={(e) => setVerticalMode(e.target.value)}
+            disabled={mode === "off"}
           >
             <option value="auto">Auto</option>
             <option value="top">Top</option>
@@ -96,6 +98,7 @@ export default function AirPumpControl() {
             id="horizontal-mode"
             value={horizontalMode} 
             onChange={(e) => setHorizontalMode(e.target.value)}
+            disabled={mode === "off"}
           >
             <option value="not_set">Not Set</option>
             <option value="left">Left</option>
