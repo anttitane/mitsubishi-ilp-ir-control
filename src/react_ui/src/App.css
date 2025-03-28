@@ -19,6 +19,7 @@ body {
   max-width: 100%;
 }
 
+/* Brand name styling */
 .brand-name.top-left {
   position: absolute;
   top: 10px;
@@ -29,6 +30,7 @@ body {
   z-index: 10;
 }
 
+/* Temperature control styling */
 .temperature-control {
   margin-top: 40px;
   margin-bottom: 20px;
@@ -64,6 +66,7 @@ body {
   background: #0056b3;
 }
 
+/* Mode buttons styling */
 .mode-buttons {
   display: flex;
   justify-content: center;
@@ -109,9 +112,14 @@ body {
   }
 }
 
+/* Dropdowns styling */
 .dropdowns {
   margin-bottom: 20px;
   text-align: left;
+}
+
+.dropdown-item {
+  margin-bottom: 15px;
 }
 
 .dropdowns label {
@@ -125,10 +133,22 @@ body {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  margin-bottom: 15px;
   font-size: 0.9rem;
 }
 
+.dropdowns.disabled label {
+  color: #9e9e9e;
+}
+
+.dropdowns select:disabled {
+  background-color: #f5f5f5;
+  color: #9e9e9e;
+  cursor: not-allowed;
+  opacity: 0.8;
+  border-color: #ddd;
+}
+
+/* Send command button styling */
 .send-command-button {
   background: #28a745;
   color: #fff;
@@ -146,18 +166,101 @@ body {
   background: #218838;
 }
 
-.dropdowns.disabled label {
-  color: #9e9e9e;
-}
-
-.dropdowns select:disabled {
-  background-color: #f5f5f5;
-  color: #9e9e9e;
+.send-command-button:disabled {
+  background: #94d3a2;
   cursor: not-allowed;
-  opacity: 0.8;
-  border-color: #ddd;
 }
 
+.send-command-button.loading {
+  position: relative;
+  padding-right: 40px;
+}
+
+.send-command-button.loading:after {
+  content: "";
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  width: 15px;
+  height: 15px;
+  margin-top: -8px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Notification styling */
+.notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 250px;
+  max-width: 90%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
+  z-index: 1000;
+}
+
+.notification.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.notification.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.notification.info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+.notification .close-button {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 18px;
+  cursor: pointer;
+  margin-left: 10px;
+  opacity: 0.7;
+}
+
+.notification .close-button:hover {
+  opacity: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Media query for touch devices */
+@media (hover: none) {
+  .mode-buttons button:hover {
+    background: #e0e0e0;
+  }
+  
+  .mode-buttons button.active:hover {
+    background: #007bff;
+  }
+}
+
+/* Responsive styling */
 @media (max-width: 768px) {
   .control-panel {
     margin-top: 20px;
@@ -203,7 +306,7 @@ body {
   }
 }
 
-/* Make sure form elements are easily tappable on mobile */
+/* Make form elements easily tappable on mobile */
 button, select, input {
   touch-action: manipulation;
 }
