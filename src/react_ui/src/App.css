@@ -14,9 +14,9 @@ body {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 60px 20px 20px;
-  width: 300px;
-  text-align: center;
+  padding: 15px;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .brand-name.top-left {
@@ -26,9 +26,11 @@ body {
   font-size: 1.5em;
   font-weight: bold;
   color: #000;
+  z-index: 10;
 }
 
 .temperature-control {
+  margin-top: 40px; /* Add margin to move temperature display down */
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
@@ -116,8 +118,60 @@ body {
   cursor: pointer;
   font-size: 1rem;
   transition: background 0.3s;
+  display: block;
+  margin: 0 auto;
 }
 
 .send-command-button:hover {
   background: #218838;
+}
+
+@media (max-width: 768px) {
+  .control-panel {
+    margin-top: 20px;
+    gap: 15px;
+  }
+  
+  .temperature {
+    font-size: 32px;
+  }
+  
+  .temperature-buttons button {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+  
+  .mode-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .mode-buttons button {
+    flex: 1;
+    margin: 0 5px;
+  }
+  
+  .dropdowns {
+    width: 100%;
+  }
+  
+  .dropdowns select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-top: 5px;
+  }
+  
+  .send-command-button {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    margin-top: 30px;
+  }
+}
+
+/* Make sure form elements are easily tappable on mobile */
+button, select, input {
+  touch-action: manipulation;
 }

@@ -24,8 +24,8 @@ export default function AirPumpControl() {
     const requestBody = {
       temperature: parseInt(temperature, 10),
       fan_speed: fanSpeed.toLowerCase(),
-      vertical_mode: verticalMode.replace(" ", ""),
-      horizontal_mode: horizontalMode.replace(" ", ""),
+      vertical_mode: verticalMode,
+      horizontal_mode: horizontalMode
     };
 
     try {
@@ -42,7 +42,6 @@ export default function AirPumpControl() {
   };
 
   return (
-    <>
     <div className="control-panel">
       <div className="brand-name top-left">MITSUBISHI</div>
       <div className="temperature-control">
@@ -52,25 +51,35 @@ export default function AirPumpControl() {
           <button onClick={() => setTemperature((prev) => Math.min(30, prev + 1))}>+</button>
         </div>
       </div>
+
       <div className="mode-buttons">
         <button className={mode === "heat" ? "active" : ""} onClick={() => setMode("heat")}>Heat</button>
         <button className={mode === "cool" ? "active" : ""} onClick={() => setMode("cool")}>Cool</button>
         <button className={mode === "off" ? "active" : ""} onClick={() => setMode("off")}>Off</button>
       </div>
+
       <div className="dropdowns">
-        <div>
-          <label>Fan Speed:</label>
-          <select value={fanSpeed} onChange={(e) => setFanSpeed(e.target.value)}>
+        <div className="dropdown-item">
+          <label htmlFor="fan-speed">Fan Speed:</label>
+          <select 
+            id="fan-speed"
+            value={fanSpeed} 
+            onChange={(e) => setFanSpeed(e.target.value)}
+          >
             <option value="auto">Auto</option>
             <option value="low">Low</option>
-            <option value="med">Medium</option>
+            <option value="med">Med</option>
             <option value="high">High</option>
           </select>
         </div>
 
-        <div>
-          <label>Vertical Mode:</label>
-          <select value={verticalMode} onChange={(e) => setVerticalMode(e.target.value)}>
+        <div className="dropdown-item">
+          <label htmlFor="vertical-mode">Vertical Mode:</label>
+          <select 
+            id="vertical-mode"
+            value={verticalMode} 
+            onChange={(e) => setVerticalMode(e.target.value)}
+          >
             <option value="auto">Auto</option>
             <option value="top">Top</option>
             <option value="middle_top">Middle Top</option>
@@ -81,9 +90,13 @@ export default function AirPumpControl() {
           </select>
         </div>
 
-        <div>
-          <label>Horizontal Mode:</label>
-          <select value={horizontalMode} onChange={(e) => setHorizontalMode(e.target.value)}>
+        <div className="dropdown-item">
+          <label htmlFor="horizontal-mode">Horizontal Mode:</label>
+          <select 
+            id="horizontal-mode"
+            value={horizontalMode} 
+            onChange={(e) => setHorizontalMode(e.target.value)}
+          >
             <option value="not_set">Not Set</option>
             <option value="left">Left</option>
             <option value="middle_left">Middle Left</option>
@@ -92,10 +105,15 @@ export default function AirPumpControl() {
             <option value="right">Right</option>
             <option value="swing">Swing</option>
           </select>
-          </div>
         </div>
-        <button onClick={sendCommand} className="send-command-button">Send Command</button>
       </div>
-    </>
+
+      <button 
+        onClick={sendCommand} 
+        className="send-command-button"
+      >
+        Send Command
+      </button>
+    </div>
   );
 }
