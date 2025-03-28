@@ -244,6 +244,8 @@ This project includes an optional **React**-based web interface for convenient c
 
 To use it: **Open** `http://<raspberry-pi-ip>:8000/ui` in your browser.
 
+<img src="./img/ui.jpg" alt="Web UI Interface" width="300">
+
 ## 🏠 Home Assistant Integration
 Custom Home Assistant integration is available for easy integration to Home Assistant:
 **https://github.com/anttitane/mitsubishi-ilp-ir-control-ha-integration**
