@@ -4,9 +4,9 @@ import "./App.css";
 export default function AirPumpControl() {
   const [mode, setMode] = useState("heat");
   const [temperature, setTemperature] = useState(23);
-  const [fanSpeed, setFanSpeed] = useState("Medium");
-  const [verticalMode, setVerticalMode] = useState("Middle Top");
-  const [horizontalMode, setHorizontalMode] = useState("Middle");
+  const [fanSpeed, setFanSpeed] = useState("auto");
+  const [verticalMode, setVerticalMode] = useState("middle_top");
+  const [horizontalMode, setHorizontalMode] = useState("middle");
 
   const sendCommand = async () => {
     if (mode === "off") {
@@ -43,53 +43,55 @@ export default function AirPumpControl() {
 
   return (
     <>
-      <div className="control-panel">
-        <div className="brand-name top-left">MITSUBISHI</div>
-        <div className="temperature-control">
-          <div className="temperature">{temperature}°C</div>
-          <div className="temperature-buttons">
-            <button onClick={() => setTemperature((prev) => Math.max(15, prev - 1))}>-</button>
-            <button onClick={() => setTemperature((prev) => Math.min(30, prev + 1))}>+</button>
-          </div>
+    <div className="control-panel">
+      <div className="brand-name top-left">MITSUBISHI</div>
+      <div className="temperature-control">
+        <div className="temperature">{temperature}°C</div>
+        <div className="temperature-buttons">
+          <button onClick={() => setTemperature((prev) => Math.max(15, prev - 1))}>-</button>
+          <button onClick={() => setTemperature((prev) => Math.min(30, prev + 1))}>+</button>
         </div>
-        <div className="mode-buttons">
-          <button className={mode === "heat" ? "active" : ""} onClick={() => setMode("heat")}>Heat</button>
-          <button className={mode === "cool" ? "active" : ""} onClick={() => setMode("cool")}>Cool</button>
-          <button className={mode === "off" ? "active" : ""} onClick={() => setMode("off")}>Off</button>
+      </div>
+      <div className="mode-buttons">
+        <button className={mode === "heat" ? "active" : ""} onClick={() => setMode("heat")}>Heat</button>
+        <button className={mode === "cool" ? "active" : ""} onClick={() => setMode("cool")}>Cool</button>
+        <button className={mode === "off" ? "active" : ""} onClick={() => setMode("off")}>Off</button>
+      </div>
+      <div className="dropdowns">
+        <div>
+          <label>Fan Speed:</label>
+          <select value={fanSpeed} onChange={(e) => setFanSpeed(e.target.value)}>
+            <option value="auto">Auto</option>
+            <option value="low">Low</option>
+            <option value="med">Medium</option>
+            <option value="high">High</option>
+          </select>
         </div>
-        <div className="dropdowns">
-          <div>
-            <label>Fan Speed:</label>
-            <select value={fanSpeed} onChange={(e) => setFanSpeed(e.target.value)}>
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
-              <option value="Auto">Auto</option>
-            </select>
-          </div>
-          <div>
-            <label>Vertical Mode:</label>
-            <select value={verticalMode} onChange={(e) => setVerticalMode(e.target.value)}>
-              <option value="Auto">Auto</option>
-              <option value="Top">Top</option>
-              <option value="Middle Top">Middle Top</option>
-              <option value="Middle">Middle</option>
-              <option value="Middle Bottom">Middle Bottom</option>
-              <option value="Bottom">Bottom</option>
-              <option value="Swing">Swing</option>
-            </select>
-          </div>
-          <div>
-            <label>Horizontal Mode:</label>
-            <select value={horizontalMode} onChange={(e) => setHorizontalMode(e.target.value)}>
-              <option value="Not Set">Not Set</option>
-              <option value="Left">Left</option>
-              <option value="Middle Left">Middle Left</option>
-              <option value="Middle">Middle</option>
-              <option value="Middle Right">Middle Right</option>
-              <option value="Right">Right</option>
-              <option value="Swing">Swing</option>
-            </select>
+
+        <div>
+          <label>Vertical Mode:</label>
+          <select value={verticalMode} onChange={(e) => setVerticalMode(e.target.value)}>
+            <option value="auto">Auto</option>
+            <option value="top">Top</option>
+            <option value="middle_top">Middle Top</option>
+            <option value="middle">Middle</option>
+            <option value="middle_bottom">Middle Bottom</option>
+            <option value="bottom">Bottom</option>
+            <option value="swing">Swing</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Horizontal Mode:</label>
+          <select value={horizontalMode} onChange={(e) => setHorizontalMode(e.target.value)}>
+            <option value="not_set">Not Set</option>
+            <option value="left">Left</option>
+            <option value="middle_left">Middle Left</option>
+            <option value="middle">Middle</option>
+            <option value="middle_right">Middle Right</option>
+            <option value="right">Right</option>
+            <option value="swing">Swing</option>
+          </select>
           </div>
         </div>
         <button onClick={sendCommand} className="send-command-button">Send Command</button>
