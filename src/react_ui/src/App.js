@@ -68,7 +68,7 @@ export default function AirPumpControl() {
           >
             <option value="auto">Auto</option>
             <option value="low">Low</option>
-            <option value="med">Med</option>
+            <option value="med">Medium</option>
             <option value="high">High</option>
           </select>
         </div>

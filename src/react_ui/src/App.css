@@ -30,7 +30,7 @@ body {
 }
 
 .temperature-control {
-  margin-top: 40px; /* Add margin to move temperature display down */
+  margin-top: 40px;
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
@@ -78,6 +78,8 @@ body {
   padding: 10px 15px;
   cursor: pointer;
   transition: background 0.3s;
+  position: relative;
+  overflow: hidden;
 }
 
 .mode-buttons button.active {
@@ -87,6 +89,24 @@ body {
 
 .mode-buttons button:hover {
   background: #add8e6;
+}
+
+/* Add active state for touch devices */
+.mode-buttons button:active {
+  background: #add8e6;
+}
+
+/* Media query for touch devices */
+@media (hover: none) {
+  .mode-buttons button:hover {
+    /* Disable hover effect on touch devices */
+    background: #e0e0e0;
+  }
+  
+  /* Only show hover background on active buttons */
+  .mode-buttons button.active:hover {
+    background: #007bff;
+  }
 }
 
 .dropdowns {
