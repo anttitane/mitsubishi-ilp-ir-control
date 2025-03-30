@@ -65,6 +65,22 @@ const API = {
       }
       throw error;
     }
+  },
+
+  /**
+   * Get the current state of the air pump
+   * @returns {Promise<ApiResponse>} Response from the server with current state
+   */
+  getState: async (): Promise<ApiResponse> => {
+    try {
+      const response = await axiosInstance.get('/air_pump/state/');
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(`Server responded with ${error.response?.status}: ${error.message}`);
+      }
+      throw error;
+    }
   }
 };
 
