@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./App.css";
-import API from "./api";
-import { TEMPERATURE, MODES, FAN_SPEEDS, VERTICAL_MODES, HORIZONTAL_MODES, OperatingMode, FanSpeed, VerticalMode, HorizontalMode } from "./constants";
+import API, { AirPumpSettings } from "./api";
+import { TEMPERATURE, MODES, FAN_SPEEDS, VERTICAL_MODES, HORIZONTAL_MODES, FanSpeed, VerticalMode, HorizontalMode, OperatingMode } from "./constants";
 import { ModeSelector, DropdownSelect, TemperatureControl, Notification, Option } from "./components";
 
 /**
@@ -59,15 +59,15 @@ const AirPumpControl: React.FC = () => {
         const response = await API.turnOff();
         showNotification(response.status, "success");
       } else {
-        const settings = {
-          temperature: parseInt(temperature.toString(), 10),
+        const settings: AirPumpSettings = {
+          temperature: temperature,
           fan_speed: fanSpeed,
           vertical_mode: verticalMode,
           horizontal_mode: horizontalMode
         };
         
         const response = await API.sendCommand(mode, settings);
-        showNotification(response.status, "success");
+        showNotification(`Command sent successfully: ${response.status}`, "success");
       }
     } catch (error) {
       showNotification(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, "error");

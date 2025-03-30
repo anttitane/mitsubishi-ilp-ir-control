@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { OperatingMode, FanSpeed, VerticalMode, HorizontalMode } from './constants';
 
 /**
@@ -18,6 +19,14 @@ export interface ApiResponse {
   [key: string]: any;
 }
 
+// Create axios instance with default configs
+const axiosInstance = axios.create({
+  baseURL: process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 /**
  * API client for interacting with the Air Pump Control API
  */
@@ -27,11 +36,15 @@ const API = {
    * @returns {Promise<ApiResponse>} Response from the server
    */
   turnOff: async (): Promise<ApiResponse> => {
-    const response = await fetch('/air_pump/off/', { method: 'POST' });
-    if (!response.ok) {
-      throw new Error(`Server responded with ${response.status}`);
+    try {
+      const response = await axiosInstance.post('/air_pump/off/');
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(`Server responded with ${error.response?.status}: ${error.message}`);
+      }
+      throw error;
     }
-    return response.json();
   },
 
   /**
@@ -42,16 +55,16 @@ const API = {
    */
   sendCommand: async (mode: OperatingMode, settings: AirPumpSettings): Promise<ApiResponse> => {
     const endpoint = mode === "heat" ? "/air_pump/heat/" : "/air_pump/cool/";
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(settings),
-    });
     
-    if (!response.ok) {
-      throw new Error(`Server responded with ${response.status}`);
+    try {
+      const response = await axiosInstance.post(endpoint, settings);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(`Server responded with ${error.response?.status}: ${error.message}`);
+      }
+      throw error;
     }
-    return response.json();
   }
 };
 
