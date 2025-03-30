@@ -66,6 +66,15 @@ class AirPumpRequest(BaseModel):
             raise ValueError('Temperature must be between 16 and 31')
         return v
 
+class AirPumpState(BaseModel):
+    power: bool = Field(False, description="Power state (on/off)")
+    mode: Optional[str] = Field(None, description="Current mode (cool/heat/off)")
+    temperature: Optional[int] = Field(None, description="Temperature setting (16-31°C)")
+    fan_speed: Optional[FanSpeedEnum] = Field(None, description="Fan speed setting")
+    vertical_mode: Optional[VerticalModeEnum] = Field(None, description="Vertical vane position")
+    horizontal_mode: Optional[HorizontalModeEnum] = Field(None, description="Horizontal vane position")
+    last_updated: Optional[str] = Field(None, description="Last updated timestamp")
+
 class ApiResponse(BaseModel):
     status: str
     message: Optional[str] = None
@@ -104,9 +113,18 @@ class AirPumpController:
     def __init__(self):
         self.gpio_pin = config['gpio']['pin']
         self.controller = Mitsubishi(self.gpio_pin, LogLevel.ErrorsOnly)
+        # Initialize state tracking
+        self._state = AirPumpState()
+        from datetime import datetime
+        self._state.last_updated = datetime.now().isoformat()
     
     def turn_off(self) -> None:
         self.controller.power_off()
+        # Update state
+        self._state.power = False
+        self._state.mode = "off"
+        from datetime import datetime
+        self._state.last_updated = datetime.now().isoformat()
     
     def send_command(self, climate_mode, request: AirPumpRequest) -> None:
         self.controller.send_command(
@@ -119,11 +137,29 @@ class AirPumpController:
             area_mode=AreaMode.Full,
             powerful=PowerfulMode.PowerfulOff
         )
+        
+        # Update state after sending command
+        self._state.power = True
+        self._state.mode = "cool" if climate_mode == ClimateMode.Cold else "heat"
+        self._state.temperature = request.temperature
+        self._state.fan_speed = request.fan_speed
+        self._state.vertical_mode = request.vertical_mode
+        self._state.horizontal_mode = request.horizontal_mode
+        from datetime import datetime
+        self._state.last_updated = datetime.now().isoformat()
+    
+    def get_state(self) -> AirPumpState:
+        return self._state
+
+# Singleton instance of the controller to maintain state across requests
+_controller_instance = None
 
 # Dependency for AirPumpController
 def get_controller():
-    controller = AirPumpController()
-    return controller
+    global _controller_instance
+    if _controller_instance is None:
+        _controller_instance = AirPumpController()
+    return _controller_instance
 
 # Set up lifespan events
 @asynccontextmanager
@@ -218,6 +254,20 @@ async def heat_air_pump(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to send heating command: {str(e)}")
+
+# Endpoint to get the current state of the air pump
+@app.get("/air_pump/state/", response_model=ApiResponse, tags=["Air Pump Control"])
+async def get_air_pump_state(controller: AirPumpController = Depends(get_controller)):
+    """Get the current state of the air pump."""
+    try:
+        state = controller.get_state()
+        return ApiResponse(
+            status="success", 
+            message="Current air pump state retrieved",
+            details=state.dict()
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get air pump state: {str(e)}")
 
 # Health check endpoint
 @app.get("/health", response_model=ApiResponse, tags=["General"])
