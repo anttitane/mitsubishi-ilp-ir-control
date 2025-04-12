@@ -148,6 +148,32 @@ body {
   border-color: #ddd;
 }
 
+/* Room temperature display */
+.room-temperature {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  text-align: left;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.room-temperature h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+  font-weight: normal;
+}
+
+.room-temperature .temperature {
+  font-size: 0.9rem;
+  font-weight: normal;
+  margin: 5px 0;
+  color: #333;
+}
+
 /* Send command button styling */
 .send-command-button {
   background: #28a745;

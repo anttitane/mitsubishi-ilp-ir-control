@@ -1,6 +1,14 @@
 gpio:
   pin: 23
 
+temperature_sensor:
+  enabled: true
+  device_path: "/sys/bus/w1/devices/28-00000a91e6ad"
+  # How often to refresh sensor data in seconds (0 means read on each request)
+  refresh_interval: 60
+  # Whether to display the temperature in the UI
+  display_in_ui: true
+
 cors:
   allow_origins:
     - "http://127.0.0.1"
