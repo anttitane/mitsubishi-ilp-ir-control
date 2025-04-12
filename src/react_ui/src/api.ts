@@ -19,6 +19,15 @@ export interface ApiResponse {
   [key: string]: any;
 }
 
+/**
+ * Interface for room temperature response
+ */
+export interface RoomTemperatureResponse {
+  temperature: number;
+  unit: string;
+  display_in_ui: boolean;
+}
+
 // Create axios instance with default configs
 const axiosInstance = axios.create({
   baseURL: process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000',
@@ -74,6 +83,22 @@ const API = {
   getState: async (): Promise<ApiResponse> => {
     try {
       const response = await axiosInstance.get('/air_pump/state/');
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(`Server responded with ${error.response?.status}: ${error.message}`);
+      }
+      throw error;
+    }
+  },
+
+  /**
+   * Get the current room temperature
+   * @returns {Promise<ApiResponse>} Response from the server with room temperature
+   */
+  getRoomTemperature: async (): Promise<ApiResponse> => {
+    try {
+      const response = await axiosInstance.get('/air_pump/room_temperature/');
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

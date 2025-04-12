@@ -18,6 +18,7 @@ A FastAPI-based application for controlling Mitsubishi HVAC systems using IR sig
 - IR LED connected to GPIO
   - Examples for building a Raspberry Pi IR sender can be found [here](https://www.raspberry-pi-geek.com/Archive/2015/10/Raspberry-Pi-IR-remote)
 - Mitsubishi HVAC unit
+- DS1820 1-wire temperature sensor (optional)
 
 ### Software
 - **Raspberry Pi OS (Bookworm or Bullseye)**
@@ -185,12 +186,29 @@ sudo systemctl restart mitsubishi-ilp.service
 **POST /turn_off/**
 #### Request Body (JSON):
 ```json
-{}
+{ }
 ```
 #### Response:
 ```json
 {
   "status": "Powered off"
+}
+```
+
+### **Room Temperature**
+**GET /air_pump/room_temperature/**
+
+Retrieves the current room temperature from the connected DS1820 1-wire temperature sensor.
+
+#### Response:
+```json
+{
+  "status": "success",
+  "message": "Room temperature retrieved",
+  "details": {
+    "temperature": 23.5,
+    "unit": "celsius"
+  }
 }
 ```
 
@@ -238,6 +256,24 @@ cors:
 ```
 
 Localhost and 192.168.1.x is allowed by default. Adjust the IP range to match your local network.
+
+## 🌡️ Temperature Sensor Configuration
+The application supports reading room temperature from a DS1820 1-wire temperature sensor connected to the Raspberry Pi.
+
+### Hardware Setup
+1. Connect a DS1820 temperature sensor to your Raspberry Pi's GPIO pins
+2. Enable 1-wire interface in Raspberry Pi configuration with `sudo raspi-config` and reboot
+
+### Configuration Options
+In `config.yaml`, under the `temperature_sensor` section:
+
+```yaml
+temperature_sensor:
+  enabled: true              # Set to false to disable the temperature sensor
+  device_path: "/sys/bus/w1/devices/28-00000a91e6ad"  # Path to your 1-wire sensor
+  refresh_interval: 60       # How often to refresh readings (seconds, 0 = every request)
+  display_in_ui: true        # Whether to show temperature in the web UI
+```
 
 ## 🌐 Web UI
 This project includes an optional **React**-based web interface for convenient control of the endpoints. 

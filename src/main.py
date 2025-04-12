@@ -13,6 +13,7 @@ from ir_sender.mitsubishi import (
     Mitsubishi, ClimateMode, FanMode, VanneVerticalMode, VanneHorizontalMode,
     ISeeMode, AreaMode, PowerfulMode
 )
+from sensors.temperature_sensor import TemperatureSensor
 
 # Load configuration from file
 def load_config() -> Dict[str, Any]:
@@ -27,6 +28,16 @@ def load_config() -> Dict[str, Any]:
         raise RuntimeError(f"Error loading configuration: {str(e)}")
 
 config = load_config()
+
+# Configure temperature sensor
+temp_sensor_config = config.get("temperature_sensor", {})
+temperature_sensor = TemperatureSensor(
+    device_path=temp_sensor_config.get("device_path", "/sys/bus/w1/devices/28-00000a91e6ad"),
+    enabled=temp_sensor_config.get("enabled", True),
+    refresh_interval=temp_sensor_config.get("refresh_interval", 60)
+)
+# Store UI display preference
+temp_display_in_ui = temp_sensor_config.get("display_in_ui", True)
 
 # Define enums for cleaner API interfaces
 class FanSpeedEnum(str, Enum):
@@ -151,6 +162,10 @@ class AirPumpController:
     def get_state(self) -> AirPumpState:
         return self._state
 
+    def get_room_temperature(self) -> float:
+        """Get the current room temperature from the sensor"""
+        return temperature_sensor.read_temperature()
+
 # Singleton instance of the controller to maintain state across requests
 _controller_instance = None
 
@@ -268,6 +283,34 @@ async def get_air_pump_state(controller: AirPumpController = Depends(get_control
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get air pump state: {str(e)}")
+
+# Add new endpoint for room temperature
+@app.get("/air_pump/room_temperature/", response_model=ApiResponse, tags=["Air Pump Monitoring"])
+async def get_room_temperature(controller: AirPumpController = Depends(get_controller)):
+    """Get the current room temperature."""
+    try:
+        temp = controller.get_room_temperature()
+        if temp is None:
+            return ApiResponse(
+                status="error",
+                message="Temperature sensor reading failed",
+                details={
+                    "enabled": temperature_sensor.enabled,
+                    "display_in_ui": temp_display_in_ui
+                }
+            )
+        
+        return ApiResponse(
+            status="success",
+            message="Room temperature retrieved",
+            details={
+                "temperature": round(temp, 1),
+                "unit": "celsius",
+                "display_in_ui": temp_display_in_ui
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get room temperature: {str(e)}")
 
 # Health check endpoint
 @app.get("/health", response_model=ApiResponse, tags=["General"])

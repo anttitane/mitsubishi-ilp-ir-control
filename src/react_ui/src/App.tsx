@@ -25,6 +25,9 @@ const AirPumpControl: React.FC = () => {
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isStateLoading, setIsStateLoading] = useState<boolean>(true);
+  const [roomTemperature, setRoomTemperature] = useState<number | null>(null);
+  const [isTemperatureLoading, setIsTemperatureLoading] = useState<boolean>(false);
+  const [shouldDisplayTemperature, setShouldDisplayTemperature] = useState<boolean>(true);
   
   // Create mutable options arrays for the dropdown components
   const fanSpeedOptions = FAN_SPEEDS as readonly Option<FanSpeed>[];
@@ -34,6 +37,14 @@ const AirPumpControl: React.FC = () => {
   // Fetch current state when component mounts
   useEffect(() => {
     fetchCurrentState();
+    fetchRoomTemperature();
+    
+    // Refresh room temperature every minute
+    const temperatureInterval = setInterval(fetchRoomTemperature, 60000);
+    
+    return () => {
+      clearInterval(temperatureInterval);
+    };
   }, []);
 
   const fetchCurrentState = async (): Promise<void> => {
@@ -82,6 +93,36 @@ const AirPumpControl: React.FC = () => {
     }
   };
   
+  const fetchRoomTemperature = async (): Promise<void> => {
+    setIsTemperatureLoading(true);
+    
+    try {
+      const response = await API.getRoomTemperature();
+      if (response.status === "success" && response.details) {
+        // Set temperature value if available
+        if (response.details.temperature) {
+          setRoomTemperature(response.details.temperature);
+        } else {
+          setRoomTemperature(null);
+        }
+        
+        // Set UI display preference based on server configuration
+        setShouldDisplayTemperature(!!response.details.display_in_ui);
+      } else {
+        setRoomTemperature(null);
+        // If error response still contains display_in_ui setting
+        if (response.details?.display_in_ui !== undefined) {
+          setShouldDisplayTemperature(!!response.details.display_in_ui);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching room temperature:", error);
+      setRoomTemperature(null);
+    } finally {
+      setIsTemperatureLoading(false);
+    }
+  };
+
   const handleTemperatureIncrement = (): void => {
     setTemperature(prev => Math.min(TEMPERATURE.MAX, prev + 1));
   };
@@ -136,62 +177,76 @@ const AirPumpControl: React.FC = () => {
   }
 
   return (
-    <div className="control-panel">
-      <div className="brand-name top-left">MITSUBISHI</div>
-      
-      <TemperatureControl 
-        temperature={temperature}
-        onIncrement={handleTemperatureIncrement}
-        onDecrement={handleTemperatureDecrement}
-      />
-      
-      <ModeSelector 
-        currentMode={mode} 
-        onSelectMode={handleModeChange} 
-      />
-      
-      <div className={`dropdowns ${mode === MODES.OFF ? "disabled" : ""}`}>
-        <DropdownSelect<FanSpeed>
-          id="fan-speed"
-          label="Fan Speed"
-          value={fanSpeed}
-          options={fanSpeedOptions}
-          onChange={setFanSpeed}
-          disabled={mode === MODES.OFF}
+    <div className="container">
+      <div className="control-panel">
+        <div className="brand-name top-left">MITSUBISHI</div>
+        
+        <TemperatureControl 
+          temperature={temperature}
+          onIncrement={handleTemperatureIncrement}
+          onDecrement={handleTemperatureDecrement}
         />
         
-        <DropdownSelect<VerticalMode>
-          id="vertical-mode"
-          label="Vertical Mode"
-          value={verticalMode}
-          options={verticalModeOptions}
-          onChange={setVerticalMode}
-          disabled={mode === MODES.OFF}
+        <ModeSelector 
+          currentMode={mode} 
+          onSelectMode={handleModeChange} 
         />
         
-        <DropdownSelect<HorizontalMode>
-          id="horizontal-mode"
-          label="Horizontal Mode"
-          value={horizontalMode}
-          options={horizontalModeOptions}
-          onChange={setHorizontalMode}
-          disabled={mode === MODES.OFF}
+        <div className={`dropdowns ${mode === MODES.OFF ? "disabled" : ""}`}>
+          <DropdownSelect<FanSpeed>
+            id="fan-speed"
+            label="Fan Speed"
+            value={fanSpeed}
+            options={fanSpeedOptions}
+            onChange={setFanSpeed}
+            disabled={mode === MODES.OFF}
+          />
+          
+          <DropdownSelect<VerticalMode>
+            id="vertical-mode"
+            label="Vertical Mode"
+            value={verticalMode}
+            options={verticalModeOptions}
+            onChange={setVerticalMode}
+            disabled={mode === MODES.OFF}
+          />
+          
+          <DropdownSelect<HorizontalMode>
+            id="horizontal-mode"
+            label="Horizontal Mode"
+            value={horizontalMode}
+            options={horizontalModeOptions}
+            onChange={setHorizontalMode}
+            disabled={mode === MODES.OFF}
+          />
+          
+          {/* Room temperature moved here, after horizontal mode */}
+          {shouldDisplayTemperature && roomTemperature !== null && (
+            <div className="room-temperature">
+              <h3>Room Temperature</h3>
+              {isTemperatureLoading ? (
+                <p>Loading...</p>
+              ) : (
+                <p className="temperature">{roomTemperature}°C</p>
+              )}
+            </div>
+          )}
+        </div>
+        
+        <button 
+          onClick={sendCommand} 
+          className={`send-command-button ${isLoading ? "loading" : ""}`}
+          disabled={isLoading}
+        >
+          {isLoading ? "Sending..." : mode === MODES.OFF ? "Turn Off" : "Send Command"}
+        </button>
+        
+        <Notification 
+          message={notification?.message}
+          type={notification?.type}
+          onClose={() => setNotification(null)}
         />
       </div>
-      
-      <button 
-        onClick={sendCommand} 
-        className={`send-command-button ${isLoading ? "loading" : ""}`}
-        disabled={isLoading}
-      >
-        {isLoading ? "Sending..." : mode === MODES.OFF ? "Turn Off" : "Send Command"}
-      </button>
-      
-      <Notification 
-        message={notification?.message}
-        type={notification?.type}
-        onClose={() => setNotification(null)}
-      />
     </div>
   );
 };
