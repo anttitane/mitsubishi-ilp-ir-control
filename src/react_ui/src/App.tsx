@@ -220,7 +220,6 @@ const AirPumpControl: React.FC = () => {
             disabled={mode === MODES.OFF}
           />
           
-          {/* Room temperature moved here, after horizontal mode */}
           {shouldDisplayTemperature && roomTemperature !== null && (
             <div className="room-temperature">
               <h3>Room Temperature</h3>
