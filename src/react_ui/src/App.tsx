@@ -54,36 +54,22 @@ const AirPumpControl: React.FC = () => {
       
       if (response.status === "success" && response.details) {
         const state = response.details;
-        
-        // Update UI state based on current state
-        if (state.power) {
-          // Set mode
-          if (state.mode) {
-            setMode(state.mode as OperatingMode);
-          }
-          
-          // Set temperature
-          if (state.temperature) {
-            setTemperature(state.temperature);
-          }
-          
-          // Set fan speed
-          if (state.fan_speed) {
-            setFanSpeed(state.fan_speed as FanSpeed);
-          }
-          
-          // Set vertical mode
-          if (state.vertical_mode) {
-            setVerticalMode(state.vertical_mode as VerticalMode);
-          }
-          
-          // Set horizontal mode
-          if (state.horizontal_mode) {
-            setHorizontalMode(state.horizontal_mode as HorizontalMode);
-          }
+        if (state.mode) {
+          setMode(state.power ? (state.mode as OperatingMode) : MODES.OFF);
         } else {
-          // Set to off if not powered
           setMode(MODES.OFF);
+        }
+        if (state.temperature) {
+          setTemperature(state.temperature);
+        }
+        if (state.fan_speed) {
+          setFanSpeed(state.fan_speed as FanSpeed);
+        }
+        if (state.vertical_mode) {
+          setVerticalMode(state.vertical_mode as VerticalMode);
+        }
+        if (state.horizontal_mode) {
+          setHorizontalMode(state.horizontal_mode as HorizontalMode);
         }
       }
     } catch (error) {
